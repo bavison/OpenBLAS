@@ -101,117 +101,49 @@ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 .macro INIT4x4
 
-	flds			S16, FP_ZERO
-	vmov.f32		s17, s16
-	vmov.f32		s18, s16
-	vmov.f32		s19, s16
-	vmov.f32		s20, s16
-	vmov.f32		s21, s16
-	vmov.f32		s22, s16
-	vmov.f32		s23, s16
-	vmov.f32		s24, s16
-	vmov.f32		s25, s16
-	vmov.f32		s26, s16
-	vmov.f32		s27, s16
-	vmov.f32		s28, s16
-	vmov.f32		s29, s16
-	vmov.f32		s30, s16
-	vmov.f32		s31, s16
+	vmov.i32        q4, #0
+	vmov.i32        q5, #0
+	vmov.i32        q6, #0
+	vmov.i32        q7, #0
 
 .endm
 
 .macro KERNEL4x4_I
 
-	fldmias AO!, { s0 - s1 }
-	pld	[ AO , #A_PRE-8 ]
-	fldmias BO!, { s8 - s9 }
-	pld	[ BO , #B_PRE-8 ]
-
-	fmuls	s16  , s0,  s8
-	fldmias AO!, { s2 - s3 }
-	fmuls	s17  , s1,  s8
-	fmuls	s18  , s2,  s8
-	fldmias BO!, { s10 - s11 }
-	fmuls	s19  , s3,  s8
-
-	fmuls	s20  , s0,  s9
-	fldmias AO!, { s4 - s5 }
-	fmuls	s21  , s1,  s9
-	fmuls	s22  , s2,  s9
-	fldmias AO!, { s6 - s7 }
-	fmuls	s23  , s3,  s9
-
-	fmuls	s24  , s0,  s10
-	fldmias BO!, { s12 - s13 }
-	fmuls	s25  , s1,  s10
-	fmuls	s26  , s2,  s10
-	fldmias BO!, { s14 - s15 }
-	fmuls	s27  , s3,  s10
-
-	fmuls	s28  , s0,  s11
-	fmuls	s29  , s1,  s11
-	fmuls	s30  , s2,  s11
-	fmuls	s31  , s3,  s11
+	vldm AO!, { q0-q1 }
+	vldm BO!, { q2-q3 }
+	vmul.f32	q4   , q0,  d4[0]
+	pld	[ AO , #A_PRE-32 ]
+	vmul.f32	q5   , q0,  d4[1]
+	pld	[ BO , #B_PRE-32 ]
+	vmul.f32	q6   , q0,  d5[0]
+	vmul.f32	q7   , q0,  d5[1]
 
 .endm
 
 
 .macro KERNEL4x4_M2
 
+	vmla.f32	q4   , q1,  d6[0]
 	pld	[ AO , #A_PRE ]
-	fmacs	s16  , s4,  s12
-	fmacs	s17  , s5,  s12
-	fldmias AO!, { s0 - s1 }
-	fmacs	s18  , s6,  s12
+	vmla.f32	q5   , q1,  d6[1]
 	pld	[ BO , #B_PRE ]
-	fmacs	s19  , s7,  s12
-
-	fmacs	s20  , s4,  s13
-	fldmias AO!, { s2 - s3 }
-	fmacs	s21  , s5,  s13
-	fmacs	s22  , s6,  s13
-	fldmias BO!, { s8 - s9 }
-	fmacs	s23  , s7,  s13
-
-	fmacs	s24  , s4,  s14
-	fldmias BO!, { s10 - s11 }
-	fmacs	s25  , s5,  s14
-	fmacs	s26  , s6,  s14
-	fmacs	s27  , s7,  s14
-
-	fmacs	s28  , s4,  s15
-	fmacs	s29  , s5,  s15
-	fmacs	s30  , s6,  s15
-	fmacs	s31  , s7,  s15
+	vldm	AO!, { q0 }
+	vldm	BO!, { q2 }
+	vmla.f32	q6   , q1,  d7[0]
+	vmla.f32	q7   , q1,  d7[1]
 
 .endm
 
 
 .macro KERNEL4x4_M1
 
-	fmacs	s16  , s0,  s8
-	fldmias AO!, { s4 - s5 }
-	fmacs	s17  , s1,  s8
-	fmacs	s18  , s2,  s8
-	fldmias AO!, { s6 - s7 }
-	fmacs	s19  , s3,  s8
-
-	fmacs	s20  , s0,  s9
-	fldmias BO!, { s12 - s13 }
-	fmacs	s21  , s1,  s9
-	fmacs	s22  , s2,  s9
-	fldmias BO!, { s14 - s15 }
-	fmacs	s23  , s3,  s9
-
-	fmacs	s24  , s0,  s10
-	fmacs	s25  , s1,  s10
-	fmacs	s26  , s2,  s10
-	fmacs	s27  , s3,  s10
-
-	fmacs	s28  , s0,  s11
-	fmacs	s29  , s1,  s11
-	fmacs	s30  , s2,  s11
-	fmacs	s31  , s3,  s11
+	vldm	AO!, { q1 }
+	vldm	BO!, { q3 }
+	vmla.f32	q4   , q0,  d4[0]
+	vmla.f32	q5   , q0,  d4[1]
+	vmla.f32	q6   , q0,  d5[0]
+	vmla.f32	q7   , q0,  d5[1]
 
 .endm
 
@@ -219,25 +151,10 @@ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 .macro KERNEL4x4_E
 
-	fmacs	s16  , s4,  s12
-	fmacs	s17  , s5,  s12
-	fmacs	s18  , s6,  s12
-	fmacs	s19  , s7,  s12
-
-	fmacs	s20  , s4,  s13
-	fmacs	s21  , s5,  s13
-	fmacs	s22  , s6,  s13
-	fmacs	s23  , s7,  s13
-
-	fmacs	s24  , s4,  s14
-	fmacs	s25  , s5,  s14
-	fmacs	s26  , s6,  s14
-	fmacs	s27  , s7,  s14
-
-	fmacs	s28  , s4,  s15
-	fmacs	s29  , s5,  s15
-	fmacs	s30  , s6,  s15
-	fmacs	s31  , s7,  s15
+	vmla.f32	q4   , q1,  d6[0]
+	vmla.f32	q5   , q1,  d6[1]
+	vmla.f32	q6   , q1,  d7[0]
+	vmla.f32	q7   , q1,  d7[1]
 
 .endm
 
@@ -246,88 +163,32 @@ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 .macro KERNEL4x4_SUB
 
-	flds	s8 , [ BO ]
-	pld	[ BO , #B_PRE ]
-
-	flds	s0 , [ AO ]
-	pld	[ AO , #A_PRE ]
-	flds	s1 , [ AO, #4 ]
-
-	fmacs	s16  , s0,  s8
-	flds	s2 , [ AO, #8 ]
-	fmacs	s17  , s1,  s8
-	flds	s3 , [ AO, #12 ]
-	fmacs	s18  , s2,  s8
-	flds	s9 , [ BO, #4 ]
-	fmacs	s19  , s3,  s8
-
-	flds	s10, [ BO, #8 ]
-	fmacs	s20  , s0,  s9
-	flds	s11, [ BO, #12 ]
-	fmacs	s21  , s1,  s9
-	fmacs	s22  , s2,  s9
-	fmacs	s23  , s3,  s9
-
-	fmacs	s24  , s0,  s10
-	fmacs	s25  , s1,  s10
-	fmacs	s26  , s2,  s10
-	fmacs	s27  , s3,  s10
-
-	fmacs	s28  , s0,  s11
-	fmacs	s29  , s1,  s11
-	add	AO , AO, #16
-	fmacs	s30  , s2,  s11
-	add	BO , BO, #16
-	fmacs	s31  , s3,  s11
+	vldm	AO!, { q0 }
+	vldm	BO!, { q2 }
+	vmla.f32	q4   , q0,  d4[0]
+	pld	[ AO , #A_PRE-16 ]
+	vmla.f32	q5   , q0,  d4[1]
+	pld	[ BO , #B_PRE-16 ]
+	vmla.f32	q6   , q0,  d5[0]
+	vmla.f32	q7   , q0,  d5[1]
 
 .endm
 
 .macro SAVE4x4
 
+	vldr	s0  , ALPHA
 	ldr	r3  , LDC
+	vmul.f32	q2, q4, d0[0]
+	vmul.f32	q3, q5, d0[0]
 	add	CO2 , CO1, r3
-	flds		s0, ALPHA
+	vstm	CO1!, { q2 }
+	vmul.f32	q2, q6, d0[0]
 	add	r4  , CO2, r3
-
-
-	fmuls	s8 , s0 , s16
-	fmuls	s9 , s0 , s17
-	fmuls	s10, s0 , s18
-	fmuls	s11, s0 , s19
-
-	fmuls	s12, s0 , s20
-	fsts	s8 , [CO1]
-	fmuls	s13, s0 , s21
-	fsts	s9 , [CO1, #4 ]
-	fmuls	s14, s0 , s22
-	fsts	s10, [CO1, #8 ]
-	fmuls	s15, s0 , s23
-	fsts	s11, [CO1, #12 ]
-
-
-	fmuls	s8 , s0 , s24
-	fsts	s12, [CO2]
-	fmuls	s9 , s0 , s25
-	fsts	s13, [CO2, #4 ]
-	fmuls	s10, s0 , s26
-	fsts	s14, [CO2, #8 ]
-	fmuls	s11, s0 , s27
-	fsts	s15, [CO2, #12 ]
-
+	vstm	CO2, { q3 }
+	vmul.f32	q3, q7, d0[0]
 	add	CO2, r4 , r3
-
-	fsts	s8 , [r4 ]
-	fmuls	s12, s0 , s28
-	fsts	s9 , [r4 , #4 ]
-	fmuls	s13, s0 , s29
-	fsts	s10, [r4 , #8 ]
-	fmuls	s14, s0 , s30
-	fsts	s11, [r4 , #12 ]
-	fmuls	s15, s0 , s31
-
-	fstmias CO2, { s12 - s15 }
-
-	add	CO1, CO1, #16
+	vstm	r4, { q2 }
+	vstm	CO2, { q3 }
 
 .endm
 
@@ -784,6 +645,7 @@ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **************************************************************************************/
 
 	PROLOGUE
+	.fpu neon
 
 	.align 5
 
